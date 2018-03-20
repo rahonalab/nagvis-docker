@@ -6,8 +6,6 @@ services:
    hostname: nagvis
    build: 
     context: ./nagvis
-   ports:
-     - 8080:80
    volumes:
      - ./nagvis-container/webroot_nagvis:/usr/local/nagvis
      - ./nagvis-container/lib/php5/sessions:/var/lib/php5/sessions
