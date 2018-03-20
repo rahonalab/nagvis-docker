@@ -14,10 +14,11 @@ if [ ! -f "/usr/local/nagvis/etc/nagvis.ini.php" ]; then
 
 fi
 
+sed -i 's/:80/:8080/' /etc/apache2/sites-available/*
+sed -i 's/Listen 80/Listen 8080/' /etc/apache2/ports.conf 
 #Ensure that nagvis site is enabled
 if [ ! -f "/etc/apache2/sites-enabled/nagvis.conf" ]; then
 a2ensite nagvis
-service apache2 reload
 fi
 
 

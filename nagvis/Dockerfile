@@ -7,8 +7,6 @@
 #Use debian:jessie
 FROM php:apache
 
-ENV PORT 8080
-
 MAINTAINER Luigi - Rahona Labs
 
 #First apt-get batch
