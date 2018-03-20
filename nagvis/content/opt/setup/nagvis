@@ -1,0 +1,51 @@
+#!/bin/bash
+#Strictly following https://support.nagios.com/forum/viewtopic.php%3Ff%3D16%26t%3D36519+&cd=2&hl=it&ct=clnk&gl=it (Nagios XI)
+echo "Starting nagvis configuration..."
+#Create nagios uid to be consistent with Nagios XI
+groupadd -g ${NAGIOS_GID} nagios && useradd -u ${NAGIOS_UID} -g ${NAGIOS_GID} -s /bin/false -M nagios
+usermod -aG nagios www-data 
+# chown directories and files that might be coming from volumes
+chown -R www-data:www-data /usr/local/nagvis
+cp -rvp /usr/local/nagvis.dist/* /usr/local/nagvis/
+
+#Overwrite shipped configuration
+#Setting nagvis ini
+cat > /usr/local/nagvis/etc/nagvis.ini.php  <<-END
+
+[global]
+file_group="nagios"
+file_mode=664
+
+logonmodule="LogonEnv"
+logonenvvar="PHP_AUTH_USER"
+logonenvcreateuser=1
+logonenvcreaterole="Guests"
+
+[paths]
+htmlcgi="/nagiosxi/includes/components/xicore"
+
+[defaults]
+backend="ndomy_1"
+contextmenu=1
+eventsound=0
+onlyhardstates=1
+hosturl="[htmlcgi]/status.php?host=[host_name]"
+hostgroupurl="[htmlcgi]/status.php?show=services&hostgroup=[hostgroup_name]"
+serviceurl="[htmlcgi]/status.php?show=servicedetail&host=[host_name]&service=[service_description]&dest=auto"
+servicegroupurl="[htmlcgi]/status.php?show=services&servicegroup=[servicegroup_name]"
+
+[backend_ndomy_1]
+backendtype="ndomy"
+dbhost="${NDO_SERVER}"
+dbport=3306
+dbname="${NDO_DB}"
+dbuser="${NDO_USER}"
+dbpass="${NDO_PASSWORD}"
+
+[automap]
+[wui]
+[worker]
+[states]
+
+END
+

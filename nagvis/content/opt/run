@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#Set localtime
+unlink /etc/localtime
+ln -s /usr/share/zoneinfo/${LOCALTIME} /etc/localtime
+echo "Time set to ${LOCALTIME}"
+
+##Config: we separate db config from file config
+
+#If we cannot find nagvis conf, run conf script
+if [ ! -f "/usr/local/nagvis/etc/nagvis.ini.php" ]; then
+
+/opt/setup/nagvis
+
+fi
+
+#Ensure that nagvis site is enabled
+if [ ! -f "/etc/apache2/sites-enabled/nagvis.conf" ]; then
+a2ensite nagvis
+service apache2 reload
+fi
+
+
+#Check for an available internet connection
+if ping -q -c 1 -W 1 8.8.8.8 >/dev/null; then
+ntpd -gq
+service ntp start
+fi
+
+
+/usr/bin/supervisord -c /etc/supervisor/supervisord.conf -n &
+trap "supervisorctl shutdown && wait" SIGTERM
+wait
